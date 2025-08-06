@@ -38,6 +38,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import AuthPage from "./AuthPage";
 
 const Header = () => {
   const router = useRouter();
@@ -49,8 +50,8 @@ const Header = () => {
 
   const user = {
     profilePicture: "",
-    name: "fsdf",
-    email: "sdfsdf@fgdfg",
+    name: "",
+    email: "",
   };
 
   const userPlaceholder = "";
@@ -100,6 +101,11 @@ const Header = () => {
             onclick: handleLoginClick,
           },
         ]),
+        {
+            icon: <Lock className="h-4 w-4" />,
+            label: "Login/Sign Up",
+            onclick: handleLoginClick,
+          },
     {
       icon: <User className="h-4 w-4" />,
       label: "My Profile",
@@ -329,6 +335,7 @@ const Header = () => {
           </SheetContent>
         </Sheet>
       </nav>
+      <AuthPage isLoginOpen={isLoginOpen} setIsLoginOpen={handleLoginClick} />
     </header>
   );
 };

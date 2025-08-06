@@ -169,7 +169,7 @@ const page = () => {
                 {isAddToCart ? (
                   <>
                     <Loader2 className="animate-spin mr-2" size={20} />
-                    Adding to cart
+                    Adding to cart...
                   </>
                 ) : (
                   <>
