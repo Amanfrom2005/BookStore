@@ -5,6 +5,9 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser'
 import connectDb from './config/dbConnect';
 import authRoutes from './routes/authRouter';
+import productRoutes from './routes/productRoute';
+import cartRoutes from './routes/cartRoute';
+import wishListRoutes from './routes/wishListRoute';
 
 dotenv.config();
 
@@ -25,6 +28,9 @@ app.use(cookieParser());
 connectDb();
 
 app.use('/api/auth', authRoutes)
+app.use('/api/product', productRoutes)
+app.use('/api/cart', cartRoutes)
+app.use('/api/wishlist', wishListRoutes)
 
 app.listen(PORT, () => {
     console.log(`listening on port ${PORT}`);
