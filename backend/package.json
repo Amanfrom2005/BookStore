@@ -26,7 +26,8 @@
     "nodemailer": "^7.0.5",
     "nodemon": "^3.1.10",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "razorpay": "^2.9.6"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.9",
@@ -35,6 +36,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/nodemailer": "^6.4.17",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.16",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }
