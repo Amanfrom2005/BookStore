@@ -7,6 +7,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BASE_URL, useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from "@/store/api";
+import { authStatus, toggleLoginDialog } from "@/store/slice/userSlice";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CheckCircle,
@@ -19,8 +21,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
 
 interface LoginProps {
   isLoginOpen: boolean;
@@ -52,6 +57,12 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const [register] = useRegisterMutation();
+  const [login] = useLoginMutation();
+  const [forgotPassword] = useForgotPasswordMutation();
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const {
     register: registerLogin,
     handleSubmit: handleLoginSubmit,
@@ -67,6 +78,70 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
     handleSubmit: handleForgotPasswordSubmit,
     formState: { errors: forgotPasswordError },
   } = useForm<ForgotPasswordFormData>();
+
+  const onSubmitSignUp = async (data: SignUpFormData) => {
+    setSignupLoading(true);
+    
+    try {
+      const {email, name, password} = data;
+      const result = await register({ email, name, password }).unwrap();
+
+      console.log("Registration successful:", result);
+
+      if(result.success) {
+        toast.success("Verification email sent");
+        dispatch(toggleLoginDialog());
+      }
+    } catch (error) {
+      toast.error("Email already exists");
+    }
+    finally{
+      setSignupLoading(false);
+    }
+  };
+
+  const onSubmitLogin = async (data: LoginFormData) => {
+    setLoginLoading(true);
+
+    try {
+      const {email, password} = data;
+      const result = await login({ email, password }).unwrap();
+
+      console.log("Login successful:", result);
+
+      if(result.success) {
+        toast.success("Login successful");
+        dispatch(toggleLoginDialog());
+        dispatch(authStatus());
+        window.location.reload();
+      }
+    } catch (error) {
+      toast.error("Invalid email or password");
+    }
+    finally{
+      setLoginLoading(false);
+    }
+  };
+
+    const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+
+    try {
+      router.push(`${BASE_URL}/auth/google`);
+      dispatch(authStatus());
+      dispatch(toggleLoginDialog());
+      setTimeout(() => {
+        toast.success("Google login successful");
+        setIsLoginOpen(false);
+      }, 3000);
+    } catch (error) {
+      toast.error("Invalid email or password");
+    }
+    finally{
+          setGoogleLoading(true);
+    }
+  };
+
 
   return (
     <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
@@ -97,7 +172,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
               transition={{ duration: 0.3 }}
             >
               <TabsContent value="login" className="space-y-4">
-                <form action="" className="space-y-4">
+                <form onSubmit={handleLoginSubmit(onSubmitLogin)} className="space-y-4">
                   <div className="relative">
                     <Input
                       {...registerLogin("email", {
@@ -163,7 +238,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                   <p className="mx-2 text-gray-500 text-sm"> Or </p>
                   <div className="flex-1 h-px bg-gray-300" />
                 </div>
-                <Button className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50">
+                <Button onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50">
                   {googleLoading ? (
                     <>
                       <Loader2 className="animate-spin mr-2" size={20} />
@@ -184,7 +259,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
               </TabsContent>
 
               <TabsContent value="signup" className="space-y-4">
-                <form action="" className="space-y-4">
+                <form onSubmit={handleSignUpSubmit(onSubmitSignUp)} className="space-y-4">
                   <div className="relative">
                     <Input
                       {...registerSignUp("name", {

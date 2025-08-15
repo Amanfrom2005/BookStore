@@ -19,27 +19,27 @@ passport.use(
       accessToken,
       refreshToken,
       profile,
-      done: (err: any, user?: IUser | false) => void
+      done: (error: any, user?: IUser | false) => void
     ) => {
-        const { emails, displayName, photos } = profile;
-      console.log('this is the profile:', profile);
+      const { emails, displayName, photos } = profile;
+      console.log("this is the profile:", profile);
       try {
         let user = await User.findOne({ email: emails?.[0]?.value });
         if (user) {
           if (!user.profilePicture && photos?.[0]?.value) {
-            user.profilePicture = photos?.[0]?.value || "";
+            user.profilePicture = photos?.[0]?.value;
             await user.save();
           }
           return done(null, user);
         }
 
         user = await User.create({
-            googleId: profile.id,
-            name: displayName,
-            email: emails?.[0]?.value,
-            profilePicture: photos?.[0]?.value || "",
-            isVerified: true,
-            agreeTerms: true,
+          googleId: profile.id,
+          name: displayName,
+          email: emails?.[0]?.value,
+          profilePicture: photos?.[0]?.value,
+          isVerified: emails?.[0]?.verified,
+          agreeTerms: true,
         });
 
         done(null, user);
@@ -49,3 +49,5 @@ passport.use(
     }
   )
 );
+
+export default passport;

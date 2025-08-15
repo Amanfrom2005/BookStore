@@ -1,12 +1,13 @@
 import express from "express";
 import { authenticatedUser } from "../middleware/authMiddleware";
-import { multerMiddleware } from "../config/cloudinaryConfig";
 import * as orderController from "../controllers/orderController";
 
 const router = express.Router();
 
-router.post("/", authenticatedUser, multerMiddleware, orderController.createOrUpdateOrder);
+router.post("/", authenticatedUser, orderController.createOrUpdateOrder);
 router.get("/", authenticatedUser, orderController.getOrderByUser);
 router.get("/:id", authenticatedUser, orderController.getOrderById);
+router.post("/payment-razorpay", authenticatedUser, orderController.createPaymentWithRazorpay);
+router.post("/razorpay-webhook", authenticatedUser, orderController.handleRazorPayWebhook);
 
 export default router;
