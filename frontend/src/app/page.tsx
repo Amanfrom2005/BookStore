@@ -20,7 +20,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import NewBooks from "./components/NewBooks";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 
 export default function Home() {
   const bannerImages = [

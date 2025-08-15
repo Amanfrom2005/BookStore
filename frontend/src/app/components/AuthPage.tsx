@@ -143,6 +143,26 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
   };
 
 
+  const onSubmitForgotPassword = async (data: ForgotPasswordFormData) => {
+    setForgotPasswordLoading(true);
+
+    try {
+      const result = await forgotPassword(data.email).unwrap();
+
+      if(result.success) {
+        toast.success("Password reset email sent");
+        setForgotPasswordSuccess(true);
+      }
+    } catch (error) {
+      toast.error("failed to send reset link");
+    }
+    finally{
+      setForgotPasswordLoading(false);
+    }
+  };
+  
+
+
   return (
     <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
       <DialogContent className="sm:max-w-[425px] p-6">
@@ -361,7 +381,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
 
               <TabsContent value="forgot" className="space-y-4">
                 {!forgotPasswordSuccess ? (
-                  <form action="" className="space-y-4">
+                  <form onSubmit={handleForgotPasswordSubmit(onSubmitForgotPassword)} className="space-y-4">
                     <div className="relative">
                       <Input
                         {...registerForgotPassword("email", {

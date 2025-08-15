@@ -54,21 +54,6 @@ const Header = () => {
   const [logout] = useLogoutMutation();
   const userPlaceholder = user?.name?.split(" ").map((n:string) => n[0]).join("");
 
-//   const userName = typeof user?.name === "string" ? user.name.trim() : "";
-// const userEmail = typeof user?.email === "string" ? user.email.trim() : "";
-// const userPlaceholder =
-//   userName
-//     ? userName
-//         .split(/\s+/)
-//         .filter(Boolean)
-//         .slice(0, 2) // first + last
-//         .map((n) => n[0]?.toUpperCase())
-//         .join("")
-//     : userEmail
-//     ? userEmail[0]?.toUpperCase()
-//     : "";
-
-
   const handleLoginClick = () => {
     dispatch(toggleLoginDialog());
     setIsDropdownOpen(false);
@@ -103,9 +88,9 @@ const Header = () => {
               <div className="flex space-x-4 items-center p-2 border-b">
                 <Avatar className="w-12 h-12 rounded-full flex items-center justify-center">
                   {user?.profilePicture ? (
-                    <AvatarImage src={user?.profilePicture} alt="user-image"></AvatarImage>
+                  <AvatarFallback>{userPlaceholder}</AvatarFallback>
                   ) : (
-                    <AvatarFallback>{userPlaceholder}</AvatarFallback>
+                    <AvatarImage src={user?.profilePicture} alt="user-image"></AvatarImage>
                   )}
                 </Avatar>
                 <div className="flex flex-col">
@@ -257,9 +242,9 @@ const Header = () => {
               >
                 <Avatar className="w-8 h-8 rounded-full flex items-center justify-center">
                   {user?.profilePicture ? (
-                    <AvatarImage src={user?.profilePicture} alt="user-image"></AvatarImage>
+                  <AvatarFallback>{userPlaceholder}</AvatarFallback>
                   ) : userPlaceholder ? (
-                    <AvatarFallback>{userPlaceholder}</AvatarFallback>
+                    <AvatarImage src={user?.profilePicture} alt="user-image"></AvatarImage>
                   ) : (
                     <User className="h-4 w-4" />
                   )}
