@@ -86,11 +86,13 @@ const Header = () => {
             href: "/account/profile",
             content: (
               <div className="flex space-x-4 items-center p-2 border-b">
-                <Avatar className="w-12 h-12 rounded-full flex items-center justify-center">
-                  {user?.profilePicture ? (
+                <Avatar className="w-8 h-8 rounded-full flex items-center justify-center">
+                  { userPlaceholder ? (
                   <AvatarFallback>{userPlaceholder}</AvatarFallback>
-                  ) : (
+                  ) : user?.profilePicture ? (
                     <AvatarImage src={user?.profilePicture} alt="user-image"></AvatarImage>
+                  ) : (
+                    <User className="h-4 w-4" />
                   )}
                 </Avatar>
                 <div className="flex flex-col">
@@ -241,9 +243,9 @@ const Header = () => {
                 className="text-gray-700 hover:text-gray-900"
               >
                 <Avatar className="w-8 h-8 rounded-full flex items-center justify-center">
-                  {user?.profilePicture ? (
+                  { userPlaceholder ? (
                   <AvatarFallback>{userPlaceholder}</AvatarFallback>
-                  ) : userPlaceholder ? (
+                  ) : user?.profilePicture ? (
                     <AvatarImage src={user?.profilePicture} alt="user-image"></AvatarImage>
                   ) : (
                     <User className="h-4 w-4" />
