@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   CheckCircle2,
   Heart,
@@ -16,50 +16,124 @@ import {
   UserIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { BookDetails } from "@/lib/types/type";
+import {
+  useAddToCartMutation,
+  useAddToWishlistMutation,
+  useGetProductByIdQuery,
+  useRemoveFromWishlistMutation,
+} from "@/store/api";
+import BookLoader from "@/lib/BookLoader";
+import NoData from "@/app/components/NoData";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { addToCart } from "@/store/slice/cartSlice";
+import toast from "react-hot-toast";
+import {
+  addToWishlistAction,
+  removeFromWishlistAction,
+} from "@/store/slice/wishlistSlice";
+import { ShareButton } from "@/app/components/Share";
 
 const page = () => {
   const params = useParams();
   const id = params.id;
   const [selectedImage, setSelectedImage] = useState(0);
   const router = useRouter();
+  const dispatch = useDispatch();
+  const {
+    data: apiResponse = {},
+    isLoading,
+    isError,
+  } = useGetProductByIdQuery(id);
   const [isAddToCart, setIsAddToCart] = useState(false);
+  const [book, setBook] = useState<BookDetails | null>(null);
+  const [addToCartMutation] = useAddToCartMutation();
+  const [addToWishlistMutation] = useAddToWishlistMutation();
+  const [removeFromWishlistMutation] = useRemoveFromWishlistMutation();
+  const wishlist = useSelector((state: RootState) => state.wishlist.items);
 
-  const book = {
-    _id: "10",
-    images: [
-      "https://images.unsplash.com/photo-1492539438225-2666b2a98f93?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG9sZCUyMCUyMGJvb2tzfGVufDB8fDB8fHww",
-      "https://images.unsplash.com/photo-1492539438225-2666b2a98f93?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG9sZCUyMCUyMGJvb2tzfGVufDB8fDB8fHww",
-      "https://media.istockphoto.com/id/910384920/photo/kid-reading-near-locked-door.webp?a=1&b=1&s=612x612&w=0&k=20&c=J3FL4ZVORItw_bkLzlVo4WO-xUy22S7Qqbuq2xusNnc=",
-      "https://media.istockphoto.com/id/910384920/photo/kid-reading-near-locked-door.webp?a=1&b=1&s=612x612&w=0&k=20&c=J3FL4ZVORItw_bkLzlVo4WO-xUy22S7Qqbuq2xusNnc=",
-      "https://media.istockphoto.com/id/910384920/photo/kid-reading-near-locked-door.webp?a=1&b=1&s=612x612&w=0&k=20&c=J3FL4ZVORItw_bkLzlVo4WO-xUy22S7Qqbuq2xusNnc=",
-    ],
-    title: "Sapiens dfsdfsdf df",
-    category: "Reading Books (History)",
-    condition: "Good",
-    classType: "Ph.D",
-    subject: "History",
-    price: 700,
-    author: "Yuval Noah Harari",
-    edition: "1st Edition",
-    description: "A brief history of humankind.",
-    finalPrice: 650,
-    shippingCharge: 35,
-    paymentMode: "Bank Account",
-    paymentDetails: {
-      bankDetails: {
-        accountNumber: "2345678901234567",
-        ifscCode: "RST9876543",
-        bankName: "JKL Bank",
-      },
-    },
-    createdAt: new Date("2024-01-10"),
-    seller: { name: "Chris Brown", phoneNumber: "8899001122" },
+  useEffect(() => {
+    if (apiResponse.success) {
+      setBook(apiResponse.data);
+    }
+  }, [apiResponse]);
+
+  const handleAddToCart = async () => {
+    if (book) {
+      setIsAddToCart(true);
+      try {
+        const result = await addToCartMutation({
+          productId: book?._id,
+          quantity: 1,
+        }).unwrap();
+        if (result.success && result.data) {
+          dispatch(addToCart(result.data));
+          toast.success(result.message || "added to cart succesfully");
+        } else {
+          throw new Error(result.message || "failed to add to cart");
+        }
+      } catch (error: any) {
+        const errormessage = error?.data?.message;
+        toast.error(errormessage);
+      } finally {
+        setIsAddToCart(false);
+      }
+    }
   };
-
-  const handleAddToCart = (productId: string) => {};
-  const handleAddToWishlist = (productId: string) => {};
+  const handleAddToWishlist = async (productId: string) => {
+    try {
+      const isWishlist = wishlist.some((item) =>
+        item.products.includes(productId)
+      );
+      if (isWishlist) {
+        const result = await removeFromWishlistMutation(productId).unwrap();
+        if (result.success) {
+          dispatch(removeFromWishlistAction(productId));
+          toast.success(result.message || "Removed from wishlist");
+        } else {
+          throw new Error(result.message || "failed to remove from wishlist");
+        }
+      } else {
+        const result = await addToWishlistMutation(productId).unwrap();
+        if (result.success) {
+          dispatch(addToWishlistAction(result.data));
+          toast.success(result.message || "Added to wishlist");
+        } else {
+          throw new Error(result.message || "failed to add to wishlist");
+        }
+      }
+    } catch (error: any) {
+      const errormessage = error?.data?.message;
+      toast.error(errormessage || "failed to remove from wishlist");
+    }
+  };
   const bookImage = book?.images || [];
+
+  if (isLoading) {
+    return <BookLoader />;
+  }
+
+  if (!book || isError) {
+    return (
+      <div className="my-10 max-w-3xl justify-center mx-auto">
+        <NoData
+          imageUrl="/images/no-book.jpg"
+          message="Loading...."
+          description="Wait, we are fetching book details"
+          onClick={() => router.push("/book-sell")}
+          buttonText="Sell Your First Book"
+        />
+      </div>
+    );
+  }
 
   const calculateDiscount = (price: number, finalPrice: number): number => {
     if (price > finalPrice && price > 0) {
@@ -138,14 +212,28 @@ const page = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline">Share</Button>
+                <ShareButton
+                  url={`${window.location.origin}/books/${book._id}`}
+                  title={`check out this book : ${book.title}`}
+                  text={`I found this interesting book on bookKart : ${book.title}`}
+                />
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleAddToWishlist(book._id)}
                 >
-                  <Heart className={`h-4 w-4 mr-1 fill-red-500`} />
-                  <span className="hidden md:inline">Add</span>
+                  <Heart
+                    className={`h-4 w-4 mr-1 ${
+                      wishlist.some((w) => w.products.includes(book._id))
+                        ? "fill-red-500"
+                        : ""
+                    }`}
+                  />
+                  <span className="hidden md:inline">
+                    {wishlist.some((w) => w.products.includes(book._id))
+                      ? "Remove"
+                      : "Add"}
+                  </span>
                 </Button>
               </div>
             </div>
@@ -165,7 +253,11 @@ const page = () => {
                 </Badge>
               </div>
 
-              <Button className="w-60 py-6 bg-blue-700">
+              <Button
+                className="w-60 py-6 bg-blue-700"
+                onClick={handleAddToCart}
+                disabled={isAddToCart}
+              >
                 {isAddToCart ? (
                   <>
                     <Loader2 className="animate-spin mr-2" size={20} />
@@ -248,12 +340,13 @@ const page = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-full bg-blue-300 flex items-center justify-center">
-                    {" "}
-                    <UserIcon className="h-6 w-6 text-blue-500" />{" "}
+                    <UserIcon className="h-6 w-6 text-blue-500" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{book.seller.name}</span>
+                      <span className="font-medium">
+                        {book.seller?.name || "Unknown Seller"}
+                      </span>
                       <Badge variant="secondary" className="text-green-600">
                         <CheckCircle2 className="h-3 w-3 mr-1" />
                         Verified
@@ -261,12 +354,15 @@ const page = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="h-4 w-4" />
-                      uuguig uig
+                      {book.seller?.addresses &&
+                      book.seller.addresses.length > 0
+                        ? book.seller.addresses.city
+                        : "Unknown Location"}
                     </div>
                   </div>
                 </div>
               </div>
-              {book.seller.phoneNumber && (
+              {book.seller?.phoneNumber && (
                 <div className="flex items-center gap-2 text-sm">
                   <MessageCircle className="h-4 w-4 text-blue-400" />
                   <span className="">Contact : {book.seller.phoneNumber} </span>
@@ -302,20 +398,23 @@ const page = () => {
                 image: { src: "/icons/fast-delivery.png", alt: "Shipping" },
               },
             ].map((item, index) => (
-              <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-none">
+              <Card
+                key={index}
+                className="bg-gradient-to-br from-amber-50 to-amber-100 border-none"
+              >
                 <CardHeader>
                   <Badge className="w-fit mb-2">{item.step}</Badge>
                   <CardTitle className="text-lg">{item.title}</CardTitle>
                   <CardDescription>{item.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <Image
-                      src={item.image.src}
-                      alt={item.image.alt}
-                      width={120}
-                      height={120}
-                      className="mx-auto"
-                    />
+                  <Image
+                    src={item.image.src}
+                    alt={item.image.alt}
+                    width={120}
+                    height={120}
+                    className="mx-auto"
+                  />
                 </CardContent>
               </Card>
             ))}

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { books } from "@/lib/Constant";
+import { BookDetails } from "@/lib/types/type";
+import { useGetProductsQuery } from "@/store/api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,6 +9,14 @@ import React, { useEffect, useState } from "react";
 
 const NewBooks = () => {
   const [currentBookSlide, setCurrentBookSlide] = useState(0);
+  const { data: apiResponse = {}, isLoading } = useGetProductsQuery({});
+  const [books, setBooks] = useState<BookDetails[]>([]);
+
+  useEffect(() => {
+    if (apiResponse.success) {
+      setBooks(apiResponse.data);
+    }
+  }, [apiResponse]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -57,7 +66,11 @@ const NewBooks = () => {
                                 <Link href={`books/${book._id}`}>
                                   <div className="relative">
                                     <Image
-                                      src={book.images && book.images[0] ? book.images[0] : "/window.svg"}
+                                      src={
+                                        book.images && book.images[0]
+                                          ? book.images[0]
+                                          : "/window.svg"
+                                      }
                                       alt={book.title}
                                       width={200}
                                       height={300}
@@ -129,7 +142,9 @@ const NewBooks = () => {
                   <button
                     key={dot}
                     onClick={() => setCurrentBookSlide(dot)}
-                    className={`h-3 w-3 rounded-full ${currentBookSlide === dot ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    className={`h-3 w-3 rounded-full ${
+                      currentBookSlide === dot ? "bg-blue-600" : "bg-gray-300"
+                    }`}
                   ></button>
                 ))}
               </div>

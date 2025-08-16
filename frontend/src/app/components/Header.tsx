@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -39,8 +39,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import AuthPage from "./AuthPage";
-import { useLogoutMutation } from "@/store/api";
+import { useGetCartQuery, useLogoutMutation } from "@/store/api";
 import toast from "react-hot-toast";
+import { setCart } from "@/store/slice/cartSlice";
 
 const Header = () => {
   const router = useRouter();
@@ -53,11 +54,24 @@ const Header = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const [logout] = useLogoutMutation();
   const userPlaceholder = user?.name?.split(" ").map((n:string) => n[0]).join("");
+  const cartItemCount = useSelector((state: RootState) => state.cart.items.length);
+  const {data:cartData} = useGetCartQuery(user?._id, {skip: !user})
+  const [searchTerms, setSearchTerms] = useState("");
+
+  const handleSearch = () => {
+    router.push(`/books?search=${encodeURIComponent(searchTerms)}`);
+  }
 
   const handleLoginClick = () => {
     dispatch(toggleLoginDialog());
     setIsDropdownOpen(false);
   };
+
+  useEffect(() => {
+    if(cartData?.success && cartData?.data){
+      dispatch(setCart(cartData.data))
+    }
+  }, [cartData, dispatch])
 
   const handleProtectionNavigation = (href: string) => {
     if (user) {
@@ -213,11 +227,14 @@ const Header = () => {
               type="text"
               placeholder="Bookname / Author / Subject / Publisher"
               className="w-full pr-10"
+              value={searchTerms}
+              onChange={(e) => setSearchTerms(e.target.value)}
             />
             <Button
               size="icon"
               variant="ghost"
               className="absolute right-0 top-1/2 -translate-y-1/2"
+              onClick={handleSearch}
             >
               <SearchIcon className="h-4 w-4" />
             </Button>
@@ -265,9 +282,9 @@ const Header = () => {
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Cart
               </Button>
-              {user && (
+              {user && cartItemCount>0 && (
                 <span className="absolute top-1 left-4 transform translate-x-1/2 bg-red-500 text-white rounded-full px-1 text-xs">
-                  4
+                  {cartItemCount}
                 </span>
               )}
             </div>
@@ -307,9 +324,9 @@ const Header = () => {
             <Button variant="ghost" className="relative">
               <ShoppingCart className="h-5 w-5 mr-2" />
             </Button>
-            {user && (
+            {user && cartItemCount>0 && (
               <span className="absolute top-1 left-4 transform translate-x-1/2 bg-red-500 text-white rounded-full px-1 text-xs">
-                4
+                {cartItemCount}
               </span>
             )}
           </div>

@@ -1,40 +1,39 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query/react";
-// Don't always import real storage!
-import { persistReducer, persistStore, FLUSH, REHYDRATE, PAUSE, PURGE, PERSIST, REGISTER } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import {
+  persistReducer,
+  persistStore,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PURGE,
+  PERSIST,
+  REGISTER,
+} from "redux-persist";
 import userReducer from "./slice/userSlice";
+import cartReducer from "./slice/cartSlice";
+import wishlistReducer from "./slice/wishlistSlice";
+import checkoutReducer from "./slice/checkoutSlice";
 import { api } from "./api";
 
-// Dynamically choose storage:
-const createNoopStorage = () => ({
-  getItem(_key: string) {
-    return Promise.resolve(null);
-  },
-  setItem(_key: string, value: any) {
-    return Promise.resolve(value);
-  },
-  removeItem(_key: string) {
-    return Promise.resolve();
-  },
-});
+const userPersistConfig = { key: "user", storage, whiteList: ["user", "isEmailVerified", "isLoggedIn"]};
+const cartPersistConfig = { key: "cart", storage, whiteList: ["items"]};
+const wishlistPersistConfig = { key: "wishlist", storage};
+const checkoutPersistConfig = { key: "checkout", storage};
 
-const isBrowser = typeof window !== "undefined";
-const storage = isBrowser
-  ? require("redux-persist/lib/storage").default
-  : createNoopStorage();
-
-const userPersistConfig = {
-  key: 'user',
-  storage,
-  whitelist: ['user', 'isEmailVerified', 'isLoggedIn'] // NOTE: use 'whitelist', not 'whiteList'
-};
-
-const persistedUserReducer = persistReducer(userPersistConfig, userReducer);
+const presistedUserReducer = persistReducer(userPersistConfig, userReducer);
+const presistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
+const presistedWishlistReducer = persistReducer(wishlistPersistConfig, wishlistReducer);
+const presistedCheckoutReducer = persistReducer(checkoutPersistConfig, checkoutReducer);
 
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
-    user: persistedUserReducer,
+    user: presistedUserReducer,
+    cart: presistedCartReducer,
+    wishlist: presistedWishlistReducer,
+    checkout: presistedCheckoutReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

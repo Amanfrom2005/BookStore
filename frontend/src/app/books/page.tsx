@@ -7,10 +7,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
-import { books, filters } from "@/lib/Constant";
+import { filters } from "@/lib/Constant";
 import Link from "next/link";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import BookLoader from "@/lib/BookLoader";
 import {
@@ -28,6 +28,8 @@ import { Heart } from "lucide-react";
 import Pagination from "../components/Pagination";
 import NoData from "../components/NoData";
 import { useRouter } from "next/navigation";
+import { useGetProductsQuery } from "@/store/api";
+import { BookDetails } from "@/lib/types/type";
 
 const page = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,13 +38,22 @@ const page = () => {
   const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState("newest");
   const bookPerPage = 6;
-  const [isLoading, setIsLoading] = useState(false);
+  const {data:apiResponse = {}, isLoading} = useGetProductsQuery({});
   const router = useRouter();
+  const [books, setBooks] = useState<BookDetails[]>([]);
+
+  const searchTerms = new URLSearchParams(window.location.search).get("search") || "";
+
+  useEffect(() => {
+    if(apiResponse.success){
+      setBooks(apiResponse.data)
+    }
+  }, [apiResponse] )
 
   const toggleFilter = (section: string, item: string) => {
-    const updateFilter = (prev: string[]) => {
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item];
-    };
+  const updateFilter = (prev: string[]) => 
+  prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item];
+    
 
     switch (section) {
       case "condition":
@@ -76,8 +87,13 @@ const page = () => {
       selectedCategory
         .map((cond) => cond.toLowerCase())
         .includes(book.category.toLocaleLowerCase());
+    const searchMatch = searchTerms ? book.title.toLowerCase().includes(searchTerms.toLowerCase())
+    || book.author.toLowerCase().includes(searchTerms.toLowerCase())
+    || book.category.toLowerCase().includes(searchTerms.toLowerCase())
+    || book.subject.toLowerCase().includes(searchTerms.toLowerCase())
+    : true;
 
-    return conditionMatch && typeMatch && categoryMatch;
+    return conditionMatch && typeMatch && categoryMatch && searchMatch;
   });
 
   const sortedBooks = [...filterBooks].sort((a, b) => {
