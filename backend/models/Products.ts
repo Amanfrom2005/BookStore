@@ -9,7 +9,7 @@ export interface IProduct extends Document {
   classType: string;
   price: number;
   finalPrice: number;
-  author: string;
+  author?: string;
   edition?: string;
   description?: string;
   shippingCharge: string;
