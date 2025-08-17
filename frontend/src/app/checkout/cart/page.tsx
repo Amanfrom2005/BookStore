@@ -3,7 +3,9 @@
 import CartItem from "@/app/components/CartItems";
 import NoData from "@/app/components/NoData";
 import PriceDetails from "@/app/components/PriceDetails";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Address } from "@/lib/types/type";
 import {
   useAddToWishlistMutation,
@@ -24,6 +26,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import CheckoutAddress from "@/app/components/CheckoutAddress";
 
 const page = () => {
   const router = useRouter();
@@ -64,7 +67,7 @@ const page = () => {
   const handleRemoveItem = async (productId: string) => {
     try {
       const result = await removeFromCartMutation(productId).unwrap();
-      if(result.success && result.data){
+      if(result.success){
         dispatch(setCart(result.data));
         toast.success(result.message || "Removed from Cart Succesfully");
       }
@@ -109,6 +112,10 @@ const page = () => {
   const totalAmount = cart.items.reduce((acc, item) => acc + (item.product.finalPrice * item.quantity), 0);
   const totalOriginalAmount = cart.items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
   const totalDiscount = totalOriginalAmount - totalAmount;
+  const shippingCharge = cart.items.map(item => item.product.shippingCharge.toLowerCase() === 'free' ? 0 : parseFloat(item.product.shippingCharge) || 0);
+
+  const maximumShippingCharge = Math.max(...shippingCharge, 0);
+  const finalAmount = totalAmount + maximumShippingCharge;
 
   const handleProceedToCheckout = async () => {
     if(step === 'cart'){
@@ -234,18 +241,63 @@ const page = () => {
                 </Card>
               </div>
 
-              <div className="">
+              <div>
                 <PriceDetails 
                   totalOriginalAmount={totalOriginalAmount}
-                  totalAmount={totalAmount}
+                  totalAmount={finalAmount}
+                  shippingCharge={maximumShippingCharge}
                   totalDiscount={totalDiscount}
                   itemCount={cart.items.length}
                   isProcessing={isProcessing}
                   step={step}
-                  onProceed
+                  onProceed={handleProceedToCheckout}
+                  onBack={() => dispatch(setCheckoutStep(step === 'address' ? 'cart' : 'address'))}
                 />
+
+                {selectedAddress && (
+                  <Card className="mt-6 mb-6 shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="text-xl">Delivery Address</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-1">
+                        <p className="">{selectedAddress?.state}</p>
+                        {selectedAddress?.addressLine2 && (
+                          <p>{selectedAddress.addressLine2}</p>
+                        )}
+                        <p>
+                          {selectedAddress.city}, {selectedAddress.state} {" "} {selectedAddress.pincode}
+                        </p>
+                        <p>Phone: {selectedAddress.phoneNumber}</p>
+                      </div>
+
+                      <Button
+                        className="mt-4"
+                        variant='outline'
+                        onClick={() => setShowAddressDialog(true)}
+                      >
+                        <MapPin className="h-4 w-4 mr-2" />Change Address
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </div>
+
+            <Dialog 
+              open={showAddressDialog}
+              onOpenChange={setShowAddressDialog}
+            >
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Select or Add dilivery address</DialogTitle>
+                </DialogHeader>
+                <CheckoutAddress
+                  onSelectAddress={handleSelectAddress}
+                  selectedAddress={selectedAddress?._id}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
