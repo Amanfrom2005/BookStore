@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
 
 interface checkoutState {
-    step: 'cart' | 'addresses' | 'payment',
+    step: 'cart' | 'address' | 'payment',
     orderId: string | null,
     orderAmount: number | null,
 }
@@ -17,7 +17,7 @@ const checkoutSlice = createSlice({
     name: 'checkout',
     initialState,
     reducers:{
-        setCheckoutStep: (state, action: PayloadAction<'cart' | 'addresses' | 'payment'>) => {
+        setCheckoutStep: (state, action: PayloadAction<'cart' | 'address' | 'payment'>) => {
             state.step = action.payload;
         },
         setOrderId: (state, action: PayloadAction<string | null>) => {

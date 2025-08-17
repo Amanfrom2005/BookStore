@@ -19,7 +19,7 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
     const {
       orderId,
       shippingAddress,
-      paymentMathod,
+      paymentMethod,
       paymentDetails,
       totalAmount,
     } = req.body;
@@ -36,7 +36,7 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
 
     if (order) {
       order.shippingAddress = shippingAddress || order.shippingAddress;
-      order.paymentMathod = paymentMathod || order.paymentMathod;
+      order.paymentMethod = paymentMethod || order.paymentMethod;
       order.totalAmount = totalAmount || order.totalAmount;
       if (paymentDetails) {
         order.paymentDetails = paymentDetails;
@@ -49,7 +49,7 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
         items: cart.items,
         totalAmount,
         shippingAddress,
-        paymentMathod,
+        paymentMethod,
         paymentDetails,
         paymentStatus: paymentDetails ? "completed" : "pending",
       });

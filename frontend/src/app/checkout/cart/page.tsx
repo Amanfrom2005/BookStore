@@ -1,6 +1,9 @@
 "use client";
 
+import CartItem from "@/app/components/CartItems";
 import NoData from "@/app/components/NoData";
+import PriceDetails from "@/app/components/PriceDetails";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   useAddToWishlistMutation,
   useGetCartQuery,
@@ -115,7 +118,7 @@ const page = () => {
             <ShoppingCart className="h-6 w-6 mr-2 text-gray-600" />
             <span className="text-lg font-semibold text-gray-800 ">
               {cart.items.length} 
-              {cart.items.length === 1 ? 'item' : 'items'}
+              {cart.items.length === 1 ? ' item' : ' items'}
               {" "}
               in your cart
             </span>
@@ -125,22 +128,45 @@ const page = () => {
           <div className="mb-8">
             <div className="flex justify-center items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className={`rounded-full p-3 ${step === "cart" ? "bg-blue-600 text-white" : "bg-gray-600 text-gray-600"}`}>
-                  <ShoppingCart className="h-6 w-6" />
+                <div className={`rounded-lg p-3 text-xs ${step === "cart" ? "bg-blue-600 text-white" : "bg-gray-600 text-white"}`}>
+                  <ShoppingCart className="h-4 w-4" />
                   <span className="font-medium hidden md:inline">Cart</span>
                 </div>
                 <ChevronRight className="h-5 w-5 text-gray-400" />
 
-                <div className={`rounded-full p-3 ${step === "addresses" ? "bg-blue-600 text-white" : "bg-gray-600 text-gray-600"}`}>
-                  <MapPin className="h-6 w-6" />
+                <div className={`rounded-lg p-3 text-xs ${step === "address" ? "bg-blue-600 text-white" : "bg-gray-600 text-white"}`}>
+                  <MapPin className="h-4 w-4" />
                   <span className="font-medium hidden md:inline">Address</span>
                 </div>
                 <ChevronRight className="h-5 w-5 text-gray-400" />
 
-                <div className={`rounded-full p-3 ${step === "payment" ? "bg-blue-600 text-white" : "bg-gray-600 text-gray-600"}`}>
-                  <CreditCard className="h-6 w-6" />
+                <div className={`rounded-lg p-3 text-xs ${step === "payment" ? "bg-blue-600 text-white" : "bg-gray-600 text-white"}`}>
+                  <CreditCard className="h-4 w-4" />
                   <span className="font-medium hidden md:inline">Payment</span>
                 </div>
+              </div>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Order summary</CardTitle>
+                    <CardDescription>Review your order details before proceeding to payment.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <CartItem 
+                      items={cart.items}
+                      onRemoveItem={handleRemoveItem}
+                      onToggleWishlist={handleAddToWishlist}
+                      wishlist={wishlist}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="">
+                <PriceDetails />
               </div>
             </div>
           </div>

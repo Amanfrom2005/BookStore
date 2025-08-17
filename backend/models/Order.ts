@@ -14,7 +14,7 @@ export interface IOrder extends Document {
     totalAmount: number;
     shippingAddress: mongoose.Types.ObjectId | IAddress;
     paymentStatus: 'pending' | 'completed' | 'failed';
-    paymentMathod: string;
+    paymentMethod: string;
     paymentDetails: {
         razorpay_order_id?: string,
         razorpay_payment_id?: string,
@@ -34,7 +34,7 @@ const orderSchema = new Schema<IOrder>({
     totalAmount: { type: Number, required: true },
     shippingAddress: { type: Schema.Types.ObjectId, ref: "Address", required: true },
     paymentStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending', required: true },
-    paymentMathod: { type: String, required: true },
+    paymentMethod: { type: String, required: true },
     paymentDetails: {
         razorpay_order_id: { type: String },
         razorpay_payment_id: { type: String },

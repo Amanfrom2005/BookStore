@@ -266,7 +266,7 @@ const page = () => {
                 ) : (
                   <>
                     <ShoppingCart className="mr-2 w-5 h-5" />
-                    Buy now
+                    Add to Cart
                   </>
                 )}
               </Button>

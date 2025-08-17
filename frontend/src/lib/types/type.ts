@@ -11,7 +11,7 @@ export interface BookDetails {
   author: string;
   edition?: string;
   description?: string;
-  shippingCharge: string;
+  shippingCharge: number;
   seller: UserData;
   paymentMode: "UPI" | "Bank Account";
   paymentDetails: {
@@ -73,12 +73,12 @@ export interface PaymentDetails {
 export interface Order {
     _id: string;
     user: UserData;
-    items: OrderItem;
+    items: OrderItem[];
     totalAmount: number;
     createdAt: Date;
     shippingAddress: Address;
     paymentStatus: string;
-    paymentMathod: string;
+    paymentMethod: string;
     paymentDetails: PaymentDetails;
     status: string;
 }
