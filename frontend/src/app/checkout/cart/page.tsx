@@ -4,13 +4,18 @@ import CartItem from "@/app/components/CartItems";
 import NoData from "@/app/components/NoData";
 import PriceDetails from "@/app/components/PriceDetails";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Address } from "@/lib/types/type";
 import {
   useAddToWishlistMutation,
+  useCreateOrUpdateOrderMutation,
+  useCreateRazorpayPaymentMutation,
   useGetCartQuery,
+  useGetOrderByIdQuery,
   useRemoveFromCartMutation,
   useRemoveFromWishlistMutation,
 } from "@/store/api";
 import { setCart } from "@/store/slice/cartSlice";
+import { setCheckoutStep, setOrderId } from "@/store/slice/checkoutSlice";
 import { toggleLoginDialog } from "@/store/slice/userSlice";
 import { addToWishlistAction, removeFromWishlistAction } from "@/store/slice/wishlistSlice";
 import { RootState } from "@/store/store";
@@ -33,6 +38,22 @@ const page = () => {
   const [removeFromWishlistMutation] = useRemoveFromWishlistMutation();
   const wishlist = useSelector((state: RootState) => state.wishlist.items);
   const cart = useSelector((state: RootState) => state.cart);
+  const [createOrUpdateOrder] = useCreateOrUpdateOrderMutation();
+  const {data: orderData, isLoading: isOrderLoading} = useGetOrderByIdQuery(orderId || '');
+  const [createRazorpayPayment] = useCreateRazorpayPaymentMutation();
+  const [selectedAddress, setSelectedAddress] = useState<Address | null> (null);
+
+  useEffect(() => {
+    if(orderData && orderData.shippingAddress){
+      setSelectedAddress(orderData.shippingAddress)
+    }
+  }, [orderData])
+
+  useEffect(() => {
+    if(step === 'address' && !selectedAddress){
+      setShowAddressDialog(true);
+    }
+  }, [step])
 
   useEffect(() => {
     if(cartData?.success && cartData?.data){
@@ -84,6 +105,54 @@ const page = () => {
    const handleLoginClick = () => {
       dispatch(toggleLoginDialog());
     };
+
+  const totalAmount = cart.items.reduce((acc, item) => acc + (item.product.finalPrice * item.quantity), 0);
+  const totalOriginalAmount = cart.items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+  const totalDiscount = totalOriginalAmount - totalAmount;
+
+  const handleProceedToCheckout = async () => {
+    if(step === 'cart'){
+      try {
+        const result = await createOrUpdateOrder({data: {items: cart.items, totalAmount: totalAmount}}).unwrap();
+        if(result.success){
+          toast.success('Order created succesfully');
+          dispatch(setOrderId(result.data._id));
+          dispatch(setCheckoutStep("address"))
+        }else{
+          throw new Error(result.message)
+        }
+      } catch (error) {
+        toast.error('failed to create order')
+        console.error(error)
+      }
+    }else if(step === 'address'){
+      if(selectedAddress){
+        dispatch(setCheckoutStep('payment'))
+      }else{
+        setShowAddressDialog(true)
+      }
+    }else if(step === 'payment'){
+      handlePayment();
+    }
+  }
+
+  const handleSelectAddress = async (address: Address) => {
+    setSelectedAddress(address);
+    setShowAddressDialog(false);
+    if(orderId){
+      try {
+        await createOrUpdateOrder({updates: {orderId, shippingAddress: address}}).unwrap();
+        toast.success('Address updated  succesfully')
+      } catch (error) {
+        toast.error('failed to update address')
+        console.error(error);
+      }
+    }
+  }
+
+  const handlePayment = async () => {
+
+  }
 
   if (!user) {
     return (
@@ -166,7 +235,15 @@ const page = () => {
               </div>
 
               <div className="">
-                <PriceDetails />
+                <PriceDetails 
+                  totalOriginalAmount={totalOriginalAmount}
+                  totalAmount={totalAmount}
+                  totalDiscount={totalDiscount}
+                  itemCount={cart.items.length}
+                  isProcessing={isProcessing}
+                  step={step}
+                  onProceed
+                />
               </div>
             </div>
           </div>
