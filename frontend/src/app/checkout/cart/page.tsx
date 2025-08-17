@@ -16,8 +16,8 @@ import {
   useRemoveFromCartMutation,
   useRemoveFromWishlistMutation,
 } from "@/store/api";
-import { setCart } from "@/store/slice/cartSlice";
-import { setCheckoutStep, setOrderId } from "@/store/slice/checkoutSlice";
+import { clearCart, setCart } from "@/store/slice/cartSlice";
+import { resetCheckout, setCheckoutStep, setOrderId } from "@/store/slice/checkoutSlice";
 import { toggleLoginDialog } from "@/store/slice/userSlice";
 import { addToWishlistAction, removeFromWishlistAction } from "@/store/slice/wishlistSlice";
 import { RootState } from "@/store/store";
@@ -27,6 +27,14 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import CheckoutAddress from "@/app/components/CheckoutAddress";
+import BookLoader from "@/lib/BookLoader";
+import Script from "next/script";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 const page = () => {
   const router = useRouter();
@@ -69,6 +77,7 @@ const page = () => {
       const result = await removeFromCartMutation(productId).unwrap();
       if(result.success){
         dispatch(setCart(result.data));
+        dispatch(resetCheckout());
         toast.success(result.message || "Removed from Cart Succesfully");
       }
     } catch (error) {
@@ -120,7 +129,7 @@ const page = () => {
   const handleProceedToCheckout = async () => {
     if(step === 'cart'){
       try {
-        const result = await createOrUpdateOrder({data: {items: cart.items, totalAmount: finalAmount}}).unwrap();
+        const result = await createOrUpdateOrder({updates: {totalAmount: finalAmount}}).unwrap();
         if(result.success){
           toast.success('Order created succesfully');
           dispatch(setOrderId(result.data._id));
@@ -162,6 +171,61 @@ const page = () => {
       toast.error('No order found')
       return;
     }
+    setIsProcessing(true);
+    try {
+      const {data, error} = await createRazorpayPayment(orderId)
+      if(error){
+        throw new Error('failed to create Razorpay Payment')
+      }
+      const razorpayOrder = data.data.order;
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        name: "Book Kart",
+        description: "Book Purchase",
+        order_id: razorpayOrder.id,
+        handler: async function (response: any){
+          try {
+            const result = await createOrUpdateOrder({
+              updates: {
+                orderId,
+                paymentDetails: {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                }
+              }
+            }).unwrap();
+            if(result.success){
+              dispatch(clearCart());
+              dispatch(resetCheckout());
+              toast.success('Payment Successful!');
+              router.push(`/checkout/payment-success?orderId=${orderId}`);
+            }else{
+              throw new Error(result.message);
+            }
+          } catch (error) {
+            console.error( 'faild to update order' ,error);
+            toast.error('Payment successfull, but failed to update order');
+          }
+        },
+        prefill: {
+          name: orderData?.data?.user?.name,
+          email: orderData?.data?.user?.email,
+          contact: orderData?.data?.user?.phoneNumber,
+        },
+        theme: {color: "#3399cc"},
+      }
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+        toast.error('failed to initiate payment. please try again');
+    }
+    finally{
+      setIsProcessing(false);
+    }
   }
 
   if (!user) {
@@ -189,8 +253,13 @@ const page = () => {
     );
   }
 
+  if(isCartLoading && isOrderLoading){
+    return <BookLoader/>
+  }
+
   return (
     <>
+    <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
       <div className="min-h-screen bg-white">
         <div className="bg-gray-100 py-4 px-6 mb-8">
           <div className="container mx-auto flex items-center">

@@ -210,10 +210,10 @@ export const api = createApi({
     }),
 
     createOrUpdateOrder: builder.mutation({
-      query: ({ orderId, orderData }) => ({
+      query: ({ orderId, updates }) => ({
         url: API_URLS.ORDERS,
         method: orderId ? "PATCH" : "POST",
-        body: orderData,
+        body: updates,
       }),
       invalidatesTags: ["Order"],
     }),
