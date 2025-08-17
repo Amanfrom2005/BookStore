@@ -120,7 +120,7 @@ const page = () => {
   const handleProceedToCheckout = async () => {
     if(step === 'cart'){
       try {
-        const result = await createOrUpdateOrder({data: {items: cart.items, totalAmount: totalAmount}}).unwrap();
+        const result = await createOrUpdateOrder({data: {items: cart.items, totalAmount: finalAmount}}).unwrap();
         if(result.success){
           toast.success('Order created succesfully');
           dispatch(setOrderId(result.data._id));
@@ -158,7 +158,10 @@ const page = () => {
   }
 
   const handlePayment = async () => {
-
+    if(!orderId){
+      toast.error('No order found')
+      return;
+    }
   }
 
   if (!user) {
@@ -294,7 +297,7 @@ const page = () => {
                 </DialogHeader>
                 <CheckoutAddress
                   onSelectAddress={handleSelectAddress}
-                  selectedAddress={selectedAddress?._id}
+                  selectedAddressId={selectedAddress?._id}
                 />
               </DialogContent>
             </Dialog>
