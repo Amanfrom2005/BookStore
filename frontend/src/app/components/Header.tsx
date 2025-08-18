@@ -216,7 +216,7 @@ const Header = () => {
       <nav className="container w-[80%] mx-auto hidden lg:flex items-center justify-between p-4">
         <Link href="/" className="flex items-center">
           <Image
-            src="/images/web-logo.png"
+            src="/images/logo.png"
             className="h-15 w-auto"
             alt="Logo"
             width={100}
