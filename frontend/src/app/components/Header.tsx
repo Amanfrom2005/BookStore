@@ -82,11 +82,13 @@ const Header = () => {
       setIsDropdownOpen(false);
     }
   };
+
   const handleLogout = async () => {
     try {
       await logout({}).unwrap();
       dispatch(logOut());
       toast.success("Logged out successfully");
+      setIsDropdownOpen(false);
       router.push("/");
     } catch (error) {
       toast.error("Failed logging out:");
@@ -94,10 +96,10 @@ const Header = () => {
   };
 
   const menuItems = [
-    ...(user
+    ...(user && user
       ? [
           {
-            href: "/account/profile",
+            href: "account/profile",
             content: (
               <div className="flex space-x-4 items-center p-2 border-b">
                 <Avatar className="w-8 h-8 rounded-full flex items-center justify-center">
