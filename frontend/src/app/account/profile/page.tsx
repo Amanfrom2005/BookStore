@@ -77,46 +77,45 @@ const page = () => {
                     id='username'
                     placeholder='Jhon'
                     disabled={!isEditing}
-                    className='pt-10'
+                    className='pl-10'
                     {...register('name')}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor='email'>Username</Label>
+                <Label htmlFor='email'>Email</Label>
                 <div className="relative">
                   <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
                   <Input
                     id='email'
                     placeholder='example@gmail.com'
                     disabled={!isEditing || isEditing}
-                    className='pt-10'
+                    className='pl-10'
                     {...register('email')}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor='phoneNumber'>Username</Label>
+                <Label htmlFor='phoneNumber'>Phone Number</Label>
                 <div className="relative">
                   <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
                   <Input
                     id='phoneNumber'
                     placeholder='+ 12345 67890'
                     disabled={!isEditing}
-                    className='pt-10'
+                    className='pl-10'
                     {...register('phoneNumber')}
                   />
                 </div>
               </div>
             </div>
 
-            <CardFooter className='bg-pink-50 mt-4 flex justify-between'>
+            <CardFooter className='bg-pink-50 mt-4 py-4 flex justify-between'>
               {isEditing ? (
                 <>
                 <Button
                   type='button'
                   variant='outline'
-                  className='mt-4'
                   onClick={() => {
                     setIsEditing(false);
                     reset();
@@ -139,7 +138,7 @@ const page = () => {
                   <Button
                   type='button'
                   variant='outline'
-                  className='mt-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white'
+                  className='bg-gradient-to-r from-pink-500 to-rose-500 text-white'
                   onClick={() => setIsEditing(true)}
                 >
                   Edit Profile

@@ -65,9 +65,9 @@ export interface OrderItem {
 }
 
 export interface PaymentDetails {
-  razorpay_order_id: { type: String };
-  razorpay_payment_id: { type: String };
-  razorpay_signature: { type: String };
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
 }
 
 export interface Order {

@@ -26,11 +26,16 @@ router.get(
     failureRedirect: `${process.env.FRONTEND_URL}`,
     session: false,
   }),
-  async (req: Request, res: Response, next:NextFunction) : Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user as IUser;
       const accessToken = await generateToken(user);
-      res.cookie('access_token', accessToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+      res.cookie("access_token", accessToken, {
+        httpOnly: true, 
+        sameSite: "none",
+        secure: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      });
       res.redirect(`${process.env.FRONTEND_URL}`);
     } catch (error) {
       next(error);
