@@ -1,9 +1,6 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
 import bcrypt from "bcryptjs";
 
-/**
- * User interface
- */
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -20,9 +17,6 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-/**
- * User schema
- */
 const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
@@ -41,9 +35,6 @@ const userSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-/**
- * Hash password before save (only if modified or new)
- */
 userSchema.pre<IUser>("save", async function (next) {
   if (this.isModified("password") && this.password) {
     const salt = await bcrypt.genSalt(10);
@@ -52,9 +43,6 @@ userSchema.pre<IUser>("save", async function (next) {
   next();
 });
 
-/**
- * Compare given password with hashed password
- */
 userSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {

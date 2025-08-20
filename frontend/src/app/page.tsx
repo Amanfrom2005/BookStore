@@ -149,7 +149,7 @@ export default function Home() {
                   </div>
                   <div className="text-left">
                     <div className="text-sm opacity-90">Start Shopping</div>
-                    <div className="font-semibold">Buy Used Books</div>
+                    <div className="font-semibold">Buy Books</div>
                   </div>
                 </div>
               </Button>
@@ -165,7 +165,7 @@ export default function Home() {
                   </div>
                   <div className="text-left">
                     <div className="text-sm opacity-90">Start Selling</div>
-                    <div className="font-semibold">Sells Old Books</div>
+                    <div className="font-semibold">Sells Books</div>
                   </div>
                 </div>
               </Button>
@@ -228,7 +228,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-4">
             <h2 className="text-3xl font-bold mb-4">
-              How to BUY second hand books online on BookKart?
+              How to BUY books online on BookKart?
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Saving some good amount of money by buying used books is just 3

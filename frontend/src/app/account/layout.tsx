@@ -95,13 +95,13 @@ const layout = ({children} : {children:React.ReactNode}) => {
             <div className="flex-1 space-y-4 py-4">
                 <div className="px-6 py-2">
                     <div className="flex items-center gap-4">
-                        <Avatar className='w-12 h-12 rounded-full'>
-                            { userPlaceholder ? (
-                                <AvatarFallback>{userPlaceholder}</AvatarFallback>
-                                ) : user?.profilePicture ? (
-                                <AvatarImage src={user?.profilePicture} alt="user-image"></AvatarImage>
-                                ) : (
-                                <User className="h-4 w-4" />
+                        <Avatar className="w-10 h-10 rounded-full flex items-center justify-center">
+                            { user?.profilePicture ? (
+                            <AvatarImage src={user?.profilePicture} alt="user-image"/>
+                            ) : userPlaceholder ? (
+                            <AvatarFallback>{userPlaceholder}</AvatarFallback>
+                            ) : (
+                            <User className="h-4 w-4" />
                             )}
                         </Avatar>
                         <div className="space-y-1">

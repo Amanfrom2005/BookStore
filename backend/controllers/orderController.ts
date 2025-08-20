@@ -52,6 +52,7 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
         paymentMethod,
         paymentDetails,
         paymentStatus: paymentDetails ? "completed" : "pending",
+        status: paymentDetails ? "processing" : "processing",
       });
     }
     await order.save();
@@ -78,8 +79,8 @@ export const getOrderByUser = async (req: Request, res: Response) => {
       .populate("user", "name email")
       .populate("shippingAddress")
       .populate({ path: "items.product", model: "Product" });
-    if (!order) {
-      return response(res, 404, "Order not found", null);
+    if (!order || order.length === 0) {
+      return response(res, 404, "No orders found", null);
     }
     return response(res, 200, "Order fetched by user successfully", order);
   } catch (error) {
@@ -121,7 +122,11 @@ export const createPaymentWithRazorpay = async (
     const razorpayOrder = await razorpay.orders.create({
       amount: Math.round(order.totalAmount * 100),
       currency: "INR",
-      receipt: order?._id.toString(),
+      receipt: order._id.toString(),
+    });
+    await Order.findByIdAndUpdate(orderId, {
+      paymentMethod: "razorpay",
+      $set: { "paymentDetails.razorpay_order_id": razorpayOrder.id }
     });
 
     return response(res, 200, "Payment created successfully", {
@@ -142,7 +147,7 @@ export const handleRazorPayWebhook = async (req: Request, res: Response) => {
 
     if (digest === req.headers["x-razorpay-signature"]) {
       const paymentId = req.body.payload.payment.entity.id;
-      const orderId = req.body.payload.payment.entity.order.id;
+      const orderId = req.body.payload.payment.entity.orderId;
 
       await Order.findOneAndUpdate(
         { "paymentDetails.razorpay_order_id": orderId },
@@ -152,9 +157,14 @@ export const handleRazorPayWebhook = async (req: Request, res: Response) => {
           "paymentDetails.razorpay_payment_id": paymentId,
         }
       );
+      // clear cart after success
+      await CartItems.findOneAndUpdate(
+        { user: req.id },
+        { $set: { items: [] } }
+      );
       return response(res, 200, "Webhook handled successfully", null);
     } else {
-      return response(res, 500, "Internal Server Error", null);
+      return response(res, 401, "Invalid signature", null);
     }
   } catch (error) {
     console.error(error);

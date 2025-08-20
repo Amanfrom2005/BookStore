@@ -40,7 +40,7 @@ const orderSchema = new Schema<IOrder>({
         razorpay_payment_id: { type: String },
         razorpay_signature: { type: String },
     },
-    status: { type: String, enum: ["processing", "shipped", "delivered", "cancelled"], default: null, required: true },
+    status: { type: String, enum: ["processing", "shipped", "delivered", "cancelled"], default: "processing", required: true }
 }, {timestamps: true});
  
 export default mongoose.model<IOrder>('Order', orderSchema);

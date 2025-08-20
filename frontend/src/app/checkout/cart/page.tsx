@@ -294,7 +294,7 @@ const page = () => {
               </div>
             </div>
 
-            <div className="grid gap-8 lg:grid-cols-3">
+            <div className="grid gap-8 lg:grid-cols-3 mt-4">
               <div className="lg:col-span-2">
                 <Card className="shadow-lg">
                   <CardHeader>

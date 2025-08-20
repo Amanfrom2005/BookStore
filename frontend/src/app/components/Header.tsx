@@ -103,10 +103,10 @@ const Header = () => {
             content: (
               <div className="flex space-x-4 items-center p-2 border-b">
                 <Avatar className="w-8 h-8 rounded-full flex items-center justify-center">
-                  { userPlaceholder ? (
-                  <AvatarFallback>{userPlaceholder}</AvatarFallback>
-                  ) : user?.profilePicture ? (
-                    <AvatarImage src={user?.profilePicture} alt="user-image"></AvatarImage>
+                  { user?.profilePicture ? (
+                    <AvatarImage src={user?.profilePicture} alt="user-image"/>
+                  ) : userPlaceholder ? (
+                    <AvatarFallback>{userPlaceholder}</AvatarFallback>
                   ) : (
                     <User className="h-4 w-4" />
                   )}
@@ -262,10 +262,10 @@ const Header = () => {
                 className="text-gray-700 hover:text-gray-900"
               >
                 <Avatar className="w-8 h-8 rounded-full flex items-center justify-center">
-                  { userPlaceholder ? (
-                  <AvatarFallback>{userPlaceholder}</AvatarFallback>
-                  ) : user?.profilePicture ? (
-                    <AvatarImage src={user?.profilePicture} alt="user-image"></AvatarImage>
+                  { user?.profilePicture ? (
+                    <AvatarImage src={user?.profilePicture} alt="user-image"/>
+                  ) : userPlaceholder ? (
+                    <AvatarFallback>{userPlaceholder}</AvatarFallback>
                   ) : (
                     <User className="h-4 w-4" />
                   )}

@@ -26,8 +26,8 @@ passport.use(
       try {
         let user = await User.findOne({ email: emails?.[0]?.value });
         if (user) {
-          if (!user.profilePicture && photos?.[0]?.value) {
-            user.profilePicture = photos?.[0]?.value;
+          if (photos?.[0]?.value) {
+            user.profilePicture = `${photos[0].value}?sz=200`;
             await user.save();
           }
           return done(null, user);
@@ -37,8 +37,8 @@ passport.use(
           googleId: profile.id,
           name: displayName,
           email: emails?.[0]?.value,
-          profilePicture: photos?.[0]?.value,
-          isVerified: emails?.[0]?.verified,
+          profilePicture: photos?.[0]?.value ? `${photos[0].value}?sz=200` : null,
+          isVerified: emails?.[0]?.verified ?? true,
           agreeTerms: true,
         });
 
