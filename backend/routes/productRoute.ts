@@ -8,7 +8,7 @@ const router = express.Router();
 router.post("/", authenticatedUser, multerMiddleware, productController.createProduct);
 router.get("/", authenticatedUser, productController.getAllProducts);
 router.get("/:id", authenticatedUser, productController.getProductById);
-router.delete("/seller/:productId", authenticatedUser, productController.deleteProduct);
 router.get("/seller/:sellerId", authenticatedUser, productController.getProductBySellerId);
+router.delete("/seller/:productId", authenticatedUser, productController.deleteProduct);
 
 export default router;

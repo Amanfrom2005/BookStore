@@ -1,32 +1,17 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import e from 'express';
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
+const transporter = nodemailer.createTransport({service: "gmail",auth: {user: process.env.EMAIL_USER,pass: process.env.EMAIL_PASS},});
 
 transporter.verify((error, success) => {
-    if(error){
-        console.log('gmail service is not ready to send the email please check the email configuration')
-    }else{
-        console.log('gmail service is ready to send the email ')
-    }
+    if(error){console.log('gmail service is not ready to send the email please check the email configuration')}
+    else{console.log('gmail service is ready to send the email ')}
 })
 
 const sendEmail = async (to: string, subject: string, body: string) => {
-    await transporter.sendMail({
-        from: `"your BookKart" <${process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html: body,
-    })
+    await transporter.sendMail({ from: `"your BookKart" <${process.env.EMAIL_USER}>`, to, subject, html: body })
 }
 
 export const sendVerificationToEmail = async (to: string, token: string) => {

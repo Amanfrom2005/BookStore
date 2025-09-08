@@ -16,22 +16,10 @@ const razorpay = new Razorpay({
 export const createOrUpdateOrder = async (req: Request, res: Response) => {
   try {
     const userId = req.id;
-    const {
-      orderId,
-      shippingAddress,
-      paymentMethod,
-      paymentDetails,
-      totalAmount,
-    } = req.body;
+    const {orderId,shippingAddress,paymentMethod,paymentDetails,totalAmount} = req.body;
 
-    const cart = await CartItems.findOne({ user: userId }).populate(
-      "items.product"
-    );
-
-    if (!cart || cart.items.length === 0) {
-      return response(res, 400, "Cart is empty", null);
-    }
-
+    const cart = await CartItems.findOne({ user: userId }).populate("items.product");
+    if (!cart || cart.items.length === 0) {return response(res, 400, "Cart is empty");}
     let order = await Order.findOne({ _id: orderId });
 
     if (order) {
@@ -40,7 +28,7 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
       order.totalAmount = totalAmount || order.totalAmount;
       if (paymentDetails) {
         order.paymentDetails = paymentDetails;
-        order.paymentStatus = "completed";
+        order.paymentStatus = "complete";
         order.status = "processing";
       }
     } else {
@@ -51,8 +39,7 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
         shippingAddress,
         paymentMethod,
         paymentDetails,
-        paymentStatus: paymentDetails ? "completed" : "pending",
-        status: paymentDetails ? "processing" : "processing",
+        paymentStatus: paymentDetails ? "complete" : "pending"
       });
     }
     await order.save();
@@ -67,7 +54,7 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
     return response(res, 200, "Order created/updated successfully", order);
   } catch (error) {
     console.error(error);
-    return response(res, 500, "Internal Server Error", null);
+    return response(res, 500, "Internal Server Error");
   }
 };
 
@@ -79,13 +66,11 @@ export const getOrderByUser = async (req: Request, res: Response) => {
       .populate("user", "name email")
       .populate("shippingAddress")
       .populate({ path: "items.product", model: "Product" });
-    if (!order || order.length === 0) {
-      return response(res, 404, "No orders found", null);
-    }
+    if (!order || order.length === 0) {return response(res, 404, "No orders found");}
     return response(res, 200, "Order fetched by user successfully", order);
   } catch (error) {
     console.error(error);
-    response(res, 500, "Internal server error", null);
+    response(res, 500, "Internal server error");
   }
 };
 
@@ -96,45 +81,34 @@ export const getOrderById = async (req: Request, res: Response) => {
       .populate("shippingAddress")
       .populate({ path: "items.product", model: "Product" });
 
-    if (!order) {
-      return response(res, 404, "Order not found", null);
-    }
+    if (!order) {return response(res, 404, "Order not found");}
     return response(res, 200, "Order fetched by Id successfully", order);
   } catch (error) {
     console.error(error);
-    response(res, 500, "Internal server error", null);
+    response(res, 500, "Internal server error");
   }
 };
 
-export const createPaymentWithRazorpay = async (
-  req: Request,
-  res: Response
-) => {
+export const createPaymentWithRazorpay = async (req: Request,res: Response) => {
   try {
     const { orderId } = req.body;
-
     const order = await Order.findById(orderId);
-
-    if (!order) {
-      return response(res, 404, "Order not found", null);
-    }
+    if (!order) {return response(res, 404, "Order not found");}
 
     const razorpayOrder = await razorpay.orders.create({
       amount: Math.round(order.totalAmount * 100),
       currency: "INR",
-      receipt: order._id.toString(),
+      receipt: order?._id.toString(),
     });
-    await Order.findByIdAndUpdate(orderId, {
-      paymentMethod: "razorpay",
-      $set: { "paymentDetails.razorpay_order_id": razorpayOrder.id }
-    });
+    // await Order.findByIdAndUpdate(orderId, {
+    //   paymentMethod: "razorpay",
+    //   $set: { "paymentDetails.razorpay_order_id": razorpayOrder.id }
+    // });
 
-    return response(res, 200, "Payment created successfully", {
-      order: razorpayOrder,
-    });
+    return response(res, 200, "Payment created successfully", {order: razorpayOrder,});
   } catch (error) {
     console.error(error);
-    return response(res, 500, "Internal Server Error", null);
+    return response(res, 500, "Internal Server Error");
   }
 };
 
@@ -147,27 +121,24 @@ export const handleRazorPayWebhook = async (req: Request, res: Response) => {
 
     if (digest === req.headers["x-razorpay-signature"]) {
       const paymentId = req.body.payload.payment.entity.id;
-      const orderId = req.body.payload.payment.entity.orderId;
+      const orderId = req.body.payload.payment.entity.order.id;
 
       await Order.findOneAndUpdate(
         { "paymentDetails.razorpay_order_id": orderId },
         {
-          paymentStatus: "completed",
+          paymentStatus: "complete",
           status: "processing",
           "paymentDetails.razorpay_payment_id": paymentId,
         }
       );
-      // clear cart after success
-      await CartItems.findOneAndUpdate(
-        { user: req.id },
-        { $set: { items: [] } }
-      );
-      return response(res, 200, "Webhook handled successfully", null);
-    } else {
-      return response(res, 401, "Invalid signature", null);
-    }
+      // await CartItems.findOneAndUpdate(
+      //   { user: req.id },
+      //   { $set: { items: [] } }
+      // );
+      return response(res, 200, "Webhook handled successfully");
+    } else {return response(res, 401, "Invalid signature");}
   } catch (error) {
     console.error(error);
-    return response(res, 500, "Internal Server Error", null);
+    return response(res, 500, "Internal Server Error");
   }
 };

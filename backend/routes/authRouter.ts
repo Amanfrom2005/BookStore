@@ -16,30 +16,18 @@ router.get("/verify-email/:token", authController.verifyEmail);
 router.get("/logout", authController.logout);
 router.get("/verify-auth", authenticatedUser, authController.checkUserAuth);
 
-router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: `${process.env.FRONTEND_URL}`,
-    session: false,
-  }),
+  passport.authenticate("google", {failureRedirect: `${process.env.FRONTEND_URL}`,session: false,}),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user as IUser;
       const accessToken = await generateToken(user);
-      res.cookie("access_token", accessToken, {
-        httpOnly: true, 
-        sameSite: "none",
-        secure: true,
-        maxAge: 24 * 60 * 60 * 1000,
-      });
+      res.cookie("access_token", accessToken, { httpOnly: true,  sameSite: "none", secure: true, maxAge: 24 * 60 * 60 * 1000});
       res.redirect(`${process.env.FRONTEND_URL}`);
-    } catch (error) {
-      next(error);
-    }
+    } catch (error) {next(error);}
   }
 );
 

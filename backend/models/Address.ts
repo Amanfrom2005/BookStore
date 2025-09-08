@@ -1,9 +1,9 @@
-import mongoose, { Document, Schema, Model } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IAddress extends Document {
-  user: mongoose.Types.ObjectId; // Reference to the User
+  user: mongoose.Types.ObjectId;
   addressLine1: string;
-  addressLine2?: string; // Optional
+  addressLine2?: string;
   phoneNumber: string;
   city: string;
   state: string;
@@ -14,7 +14,7 @@ const addressSchema = new Schema<IAddress>(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     addressLine1: { type: String, required: true },
-    addressLine2: { type: String, default: null }, // optional by default
+    addressLine2: { type: String, default: null },
     phoneNumber: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
@@ -23,9 +23,4 @@ const addressSchema = new Schema<IAddress>(
   { timestamps: true }
 );
 
-const Address: Model<IAddress> = mongoose.model<IAddress>(
-  "Address",
-  addressSchema
-);
-
-export default Address;
+export default mongoose.model<IAddress>("Address",addressSchema);

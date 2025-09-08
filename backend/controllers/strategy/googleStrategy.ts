@@ -9,9 +9,9 @@ dotenv.config();
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || "",
+      clientID: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || '',
       passReqToCallback: true,
     },
     async (
@@ -26,8 +26,8 @@ passport.use(
       try {
         let user = await User.findOne({ email: emails?.[0]?.value });
         if (user) {
-          if (photos?.[0]?.value) {
-            user.profilePicture = `${photos[0].value}?sz=200`;
+          if (!user.profilePicture && photos?.[0]?.value) {
+            user.profilePicture = photos?.[0]?.value;
             await user.save();
           }
           return done(null, user);
@@ -37,8 +37,8 @@ passport.use(
           googleId: profile.id,
           name: displayName,
           email: emails?.[0]?.value,
-          profilePicture: photos?.[0]?.value ? `${photos[0].value}?sz=200` : null,
-          isVerified: emails?.[0]?.verified ?? true,
+          profilePicture: photos?.[0]?.value,
+          isVerified: true,
           agreeTerms: true,
         });
 

@@ -13,7 +13,7 @@ export interface IOrder extends Document {
     items: IOrderItem[];
     totalAmount: number;
     shippingAddress: mongoose.Types.ObjectId | IAddress;
-    paymentStatus: 'pending' | 'completed' | 'failed';
+    paymentStatus: 'pending' | 'complete' | 'failed';
     paymentMethod: string;
     paymentDetails: {
         razorpay_order_id?: string,
@@ -30,17 +30,17 @@ const orderItemsSchema = new Schema<IOrderItem>({
 
 const orderSchema = new Schema<IOrder>({
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    items: { type: [orderItemsSchema], required: true },
-    totalAmount: { type: Number, required: true },
-    shippingAddress: { type: Schema.Types.ObjectId, ref: "Address", required: true },
-    paymentStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending', required: true },
-    paymentMethod: { type: String, required: true },
+    items: [orderItemsSchema],
+    totalAmount: { type: Number },
+    shippingAddress: { type: Schema.Types.ObjectId, ref: "Address" },
+    paymentStatus: { type: String, enum: ['pending', 'complete', 'failed'], default: 'pending' },
+    paymentMethod: { type: String },
     paymentDetails: {
         razorpay_order_id: { type: String },
         razorpay_payment_id: { type: String },
         razorpay_signature: { type: String },
     },
-    status: { type: String, enum: ["processing", "shipped", "delivered", "cancelled"], default: "processing", required: true }
+    status: { type: String, enum: ["processing", "shipped", "delivered", "cancelled"], default: null }
 }, {timestamps: true});
  
 export default mongoose.model<IOrder>('Order', orderSchema);

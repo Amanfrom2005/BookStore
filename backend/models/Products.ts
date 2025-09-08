@@ -9,15 +9,15 @@ export interface IProduct extends Document {
   classType: string;
   price: number;
   finalPrice: number;
-  author?: string;
+  author: string;
   edition?: string;
   description?: string;
   shippingCharge: string;
   seller: mongoose.Types.ObjectId;
-  paymentMode: "UPI" | "Bank Account";
+  paymentMode: 'UPI' | 'Bank Account';
   paymentDetails: {
     upiId?: string;
-    bankDetails: {
+    bankDetails?: {
       accountNumber: string;
       ifscCode: string;
       bankName: string;
@@ -25,8 +25,7 @@ export interface IProduct extends Document {
   };
 }
 
-const productSchema = new Schema<IProduct>(
-  {
+const productSchema = new Schema<IProduct>({
     title: { type: String, required: true },
     images: [{ type: String }],
     subject: { type: String, required: true },
@@ -39,11 +38,7 @@ const productSchema = new Schema<IProduct>(
     description: { type: String },
     finalPrice: { type: Number, required: true },
     shippingCharge: { type: String },
-    paymentMode: {
-      type: String,
-      enum: ["UPI", "Bank Account"],
-      required: true,
-    },
+    paymentMode: { type: String, enum: ["UPI", "Bank Account"], required: true,},
     paymentDetails: {
       upiId: { type: String },
       bankDetails: {
@@ -53,8 +48,6 @@ const productSchema = new Schema<IProduct>(
       },
     },
     seller: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  },
-  { timestamps: true }
-);
+  },{ timestamps: true });
 
 export default mongoose.model<IProduct>("Product", productSchema);

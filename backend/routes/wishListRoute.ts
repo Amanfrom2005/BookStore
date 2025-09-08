@@ -5,7 +5,7 @@ import * as wishListController from "../controllers/wishListController";
 const router = express.Router();
 
 router.post("/add", authenticatedUser, wishListController.addToWishList);
+router.get("/:userId", authenticatedUser, wishListController.getWishListByUser);
 router.delete("/remove/:productId", authenticatedUser, wishListController.removeFromWishList);
-router.get("/user/:userId", authenticatedUser, wishListController.getWishListByUser);
 
 export default router;

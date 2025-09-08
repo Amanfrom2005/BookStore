@@ -11,22 +11,15 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET as string,
 });
 
-interface CustomFile extends Express.Multer.File {
-  path: string;
-}
+interface CustomFile extends Express.Multer.File {path: string;}
 
 const uploadToCloudinary = (file: CustomFile): Promise<UploadApiResponse> => {
-    const options: UploadApiOptions = {
-        resource_type: 'image',
-    };
+    const options: UploadApiOptions = {resource_type: 'image',};
 
     return new Promise((resolve, reject) => {
         cloudinary.uploader.upload(file.path, options, (error, result) => {
-            if (error) {
-                return reject(error);
-            } else {
-                resolve(result as UploadApiResponse);
-            }
+            if (error) { return reject(error)}
+            resolve(result as UploadApiResponse)
         });
     });
 }
