@@ -19,9 +19,7 @@ const page: React.FC = () => {
   const isVerifyEmail = useSelector(
     (state: RootState) => state.user.isEmailVerified
   );
-  const [verificationStatus, setVerificationStatus] = useState<
-    "loading" | "success" | "already_verified" | "failed"
-  >("loading");
+  const [verificationStatus, setVerificationStatus] = useState<"loading" | "success" | "already_verified" | "failed">("loading");
 
   useEffect(() => {
     const verify = async () => {

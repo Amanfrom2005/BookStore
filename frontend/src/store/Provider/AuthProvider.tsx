@@ -24,7 +24,7 @@ export default function AuthCheck({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         dispatch(logOut());
-        console.error("Error verifying auth:", error);
+        console.log("Error verifying auth:", error);
       } finally {
         setIsCheckingAuth(false);
       }

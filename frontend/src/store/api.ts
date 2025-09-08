@@ -13,28 +13,23 @@ const API_URLS = {
   RESET_PASSWORD: (token: string) => `${BASE_URL}/auth/reset-password/${token}`,
   VERIFY_AUTH: `${BASE_URL}/auth/verify-auth`,
   LOGOUT: `${BASE_URL}/auth/logout`,
-  UPDATE_USER_PROFILE: (userId: string) =>
-    `${BASE_URL}/user/profile/update/${userId}`,
+  UPDATE_USER_PROFILE: (userId: string) =>`${BASE_URL}/user/profile/update/${userId}`,
 
   // product
   PRODUCTS: `${BASE_URL}/product`,
   PRODUCT_BY_ID: (id: string) => `${BASE_URL}/product/${id}`,
-  GET_PRODUCT_BY_SELLER_ID: (sellerId: string) =>
-    `${BASE_URL}/product/seller/${sellerId}`,
-  DELETE_PRODUCT_BY_PRODUCT_ID: (productId: string) =>
-    `${BASE_URL}/product/seller/${productId}`,
+  GET_PRODUCT_BY_SELLER_ID: (sellerId: string) =>`${BASE_URL}/product/seller/${sellerId}`,
+  DELETE_PRODUCT_BY_PRODUCT_ID: (productId: string) =>`${BASE_URL}/product/seller/${productId}`,
 
   // cart
   CART: (userId: string) => `${BASE_URL}/cart/${userId}`,
   ADD_TO_CART: `${BASE_URL}/cart/add`,
-  REMOVE_FROM_CART: (productId: string) =>
-    `${BASE_URL}/cart/remove/${productId}`,
+  REMOVE_FROM_CART: (productId: string) =>`${BASE_URL}/cart/remove/${productId}`,
 
   // wishlist
   WISHLIST: (userId: string) => `${BASE_URL}/wishlist/${userId}`,
   ADD_TO_WISHLIST: `${BASE_URL}/wishlist/add`,
-  REMOVE_FROM_WISHLIST: (productId: string) =>
-    `${BASE_URL}/wishlist/remove/${productId}`,
+  REMOVE_FROM_WISHLIST: (productId: string) =>`${BASE_URL}/wishlist/remove/${productId}`,
 
   // order
   ORDERS: `${BASE_URL}/order`,
@@ -112,7 +107,7 @@ export const api = createApi({
 
     //update user
     updateUser: builder.mutation({
-      query: ({ userId, ...userData }) => ({
+      query: ({ userId, userData }) => ({
         url: API_URLS.UPDATE_USER_PROFILE(userId),
         method: "PUT",
         body: userData,
@@ -210,10 +205,10 @@ export const api = createApi({
     }),
 
     createOrUpdateOrder: builder.mutation({
-      query: ({ orderId, updates }) => ({
+      query: ({ orderId, orderData }) => ({
         url: API_URLS.ORDERS,
         method: orderId ? "PATCH" : "POST",
-        body: updates,
+        body: orderData,
       }),
       invalidatesTags: ["Order"],
     }),
@@ -224,7 +219,6 @@ export const api = createApi({
         method: "POST",
         body: { orderId },
       }),
-      invalidatesTags: ["Order"],
     }),
 
     //address

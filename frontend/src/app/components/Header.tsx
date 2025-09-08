@@ -52,7 +52,7 @@ const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const user = useSelector((state: RootState) => state.user.user);
-  const [logout] = useLogoutMutation();
+  const [logoutMutation] = useLogoutMutation();
   const userPlaceholder = user?.name?.split(" ").map((n:string) => n[0]).join("");
   const cartItemCount = useSelector((state: RootState) => state.cart.items.length);
   const {data:cartData} = useGetCartQuery(user?._id, {skip: !user})
@@ -85,7 +85,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      await logout({}).unwrap();
+      await logoutMutation({}).unwrap();
       dispatch(logOut());
       toast.success("Logged out successfully");
       setIsDropdownOpen(false);

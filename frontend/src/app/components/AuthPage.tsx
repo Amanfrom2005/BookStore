@@ -105,8 +105,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
     setLoginLoading(true);
 
     try {
-      const {email, password} = data;
-      const result = await login({ email, password }).unwrap();
+      const result = await login(data).unwrap();
 
       console.log("Login successful:", result);
 
@@ -125,25 +124,25 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
     }
   };
 
-    const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
+  const handleGoogleLogin = async () => {
+  setGoogleLoading(true);
 
-    try {
-      router.push(`${BASE_URL}/auth/google`);
-      dispatch(authStatus());
-      dispatch(toggleLoginDialog());
-      setTimeout(() => {
-        toast.success("Google login successful");
-        setIsLoginOpen(false);
-        router.push("/");
-      }, 3000);
-    } catch (error) {
-      toast.error("Invalid email or password");
-    }
-    finally{
-          setGoogleLoading(true);
-    }
-  };
+  try {
+    router.push(`${BASE_URL}/auth/google`);
+    dispatch(authStatus());
+    dispatch(toggleLoginDialog());
+    setTimeout(() => {
+      toast.success("Google login successful");
+      setIsLoginOpen(false);
+      router.push("/");
+    }, 3000);
+  } catch (error) {
+    toast.error("Invalid email or password");
+  }
+  finally{
+        setGoogleLoading(false);
+  }
+};
 
 
   const onSubmitForgotPassword = async (data: ForgotPasswordFormData) => {

@@ -120,8 +120,7 @@ const page = () => {
   const totalAmount = cart.items.reduce((acc, item) => acc + (item.product.finalPrice * item.quantity), 0);
   const totalOriginalAmount = cart.items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
   const totalDiscount = totalOriginalAmount - totalAmount;
-  const shippingCharge = cart.items.map(item => item.product.shippingCharge === 'free' ? 0 : parseFloat(item.product.shippingCharge) || 0);
-
+  const shippingCharge = cart.items.map(item => (typeof item.product.shippingCharge === "number" ? item.product.shippingCharge : 0));
   const maximumShippingCharge = Math.max(...shippingCharge, 0);
   const finalAmount = totalAmount + maximumShippingCharge;
 
